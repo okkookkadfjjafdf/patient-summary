@@ -126,6 +126,8 @@ def main():
     with patient_input_expander:
         st.write(patient_data['patient_input'])
 
+    st.divider()
+
     prompt = f"""
     You are a physician preparing for a patient visit. The patient has the following medical records:
 
