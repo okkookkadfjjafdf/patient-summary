@@ -10,6 +10,7 @@ patient_data = {
     "name": "Ben Hackett",
     "age": 45,
     "gender": "Male",
+    "summary": "Ben Hackett is a 45-year-old male with a history of type 2 diabetes, hypertension, hyperlipidemia, obesity, chronic kidney disease (stage 3), and sleep apnea. He has been managing his diabetes with metformin and lifestyle modifications but has been struggling with maintaining good glycemic control. His blood pressure and lipid levels are also elevated, and his kidney function is impaired.",
     "conditions": [
         "Type 2 Diabetes",
         "Hypertension",
@@ -30,8 +31,33 @@ patient_data = {
         "BMI": 32,
         "Urine Albumin-to-Creatinine Ratio (UACR)": 45
     },
-    "summary": "Ben Hackett is a 45-year-old male with a history of type 2 diabetes, hypertension, hyperlipidemia, obesity, chronic kidney disease (stage 3), and sleep apnea. He has been managing his diabetes with metformin and lifestyle modifications but has been struggling with maintaining good glycemic control. His blood pressure and lipid levels are also elevated, and his kidney function is impaired."
+    "specialist_visit": {
+        "specialty": "Cardiology",
+        "facility": "ABC Medical Center",
+        "date": "2023-03-15",
+        "summary": "Patient referred for evaluation of cardiovascular risk factors and potential complications related to his existing conditions. Echocardiogram showed mild left ventricular hypertrophy, likely due to longstanding hypertension. Stress test revealed no significant ischemic changes. Recommend aggressive management of hypertension, diabetes, and hyperlipidemia to reduce cardiovascular risk.",
+        "cardiac_summary": "Mild left ventricular hypertrophy, no significant ischemic changes on stress test. High risk for cardiovascular complications due to multiple comorbidities."
+    },
+    "patient_input": "I've been trying to follow a low-carb diet and exercise more regularly, but I still struggle with late-night snacking. My sleep has improved slightly with the CPAP machine, but I often feel tired during the day. I've been taking my medications as prescribed.",
+    "prescriptions": [
+        "Metformin 1000 mg twice daily",
+        "Lisinopril 20 mg once daily",
+        "Atorvastatin 40 mg once daily",
+        "Aspirin 81 mg once daily"
+    ]
 }
+
+def generate_doctor_name():
+    prompt = "Generate a random doctor name."
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[{"role": "system", "content": prompt}],
+        max_tokens=50,
+        n=1,
+        stop=None,
+        temperature=0.7,
+    )
+    return response.choices[0].message['content'].strip()
 
 def generate_plan(prompt):
     print("Generating plan with prompt:")
@@ -66,8 +92,39 @@ def display_plan(plan):
 
 def main():
     st.title("Physician Prep for Patient Visit")
-    st.write("Patient Data:")
-    st.write(patient_data)
+
+    st.header("Patient Data")
+    st.write(f"Name: {patient_data['name']}")
+    st.write(f"Age: {patient_data['age']}")
+    st.write(f"Gender: {patient_data['gender']}")
+    st.write(f"Summary: {patient_data['summary']}")
+
+    conditions_expander = st.expander("Conditions")
+    with conditions_expander:
+        for condition in patient_data['conditions']:
+            st.write(f"- {condition}")
+
+    labs_expander = st.expander("Labs")
+    with labs_expander:
+        for lab, value in patient_data['labs'].items():
+            st.write(f"- {lab}: {value}")
+
+    prescriptions_expander = st.expander("Prescriptions")
+    with prescriptions_expander:
+        for prescription in patient_data['prescriptions']:
+            st.write(f"- {prescription}")
+
+    doctor_name = generate_doctor_name()
+    specialist_visit_title = f"{patient_data['specialist_visit']['specialty']} Visit with Dr. {doctor_name} at {patient_data['specialist_visit']['facility']}"
+    specialist_expander = st.expander(specialist_visit_title)
+    with specialist_expander:
+        st.write(f"Date: {patient_data['specialist_visit']['date']}")
+        st.write(f"Summary: {patient_data['specialist_visit']['summary']}")
+        st.write(f"Cardiac Summary: {patient_data['specialist_visit']['cardiac_summary']}")
+
+    patient_input_expander = st.expander("Patient Input (last 3 months)")
+    with patient_input_expander:
+        st.write(patient_data['patient_input'])
 
     prompt = f"""
     You are a physician preparing for a patient visit. The patient has the following medical records:
@@ -75,6 +132,7 @@ def main():
     Name: {patient_data['name']}
     Age: {patient_data['age']}
     Gender: {patient_data['gender']}
+    Summary: {patient_data['summary']}
     Conditions: {', '.join(patient_data['conditions'])}
     Labs:
     - HbA1c: {patient_data['labs']['HbA1c']}
@@ -87,7 +145,19 @@ def main():
     - eGFR: {patient_data['labs']['eGFR']}
     - BMI: {patient_data['labs']['BMI']}
     - Urine Albumin-to-Creatinine Ratio (UACR): {patient_data['labs']['Urine Albumin-to-Creatinine Ratio (UACR)']}
-    Summary: {patient_data['summary']}
+    
+    Specialist Visit:
+    - Specialty: {patient_data['specialist_visit']['specialty']}
+    - Doctor: Dr. {doctor_name}
+    - Facility: {patient_data['specialist_visit']['facility']}
+    - Date: {patient_data['specialist_visit']['date']}
+    - Summary: {patient_data['specialist_visit']['summary']}
+    - Cardiac Summary: {patient_data['specialist_visit']['cardiac_summary']}
+    
+    Prescriptions:
+    {chr(10).join([f"- {prescription}" for prescription in patient_data['prescriptions']])}
+
+    Patient Input (last 3 months): {patient_data['patient_input']}
 
     Based on this information, provide a concise bullet-point summary (no more than 3 bullet points) of the key points to discuss and potential treatment adjustments for the upcoming patient visit. Each bullet point should be around 25 words, with an absolute maximum of 50 words. Be as concise as possible.
     """
@@ -106,12 +176,12 @@ def main():
         st.session_state.generated_plan = plan
 
     if st.session_state.generated_plan:
-        st.write("Patient Visit Plan:")
+        st.header("Patient Visit Plan")
         display_plan(st.session_state.generated_plan)
 
         follow_up_container = st.container()
         with follow_up_container:
-            st.write("Follow-up Questions and Responses:")
+            st.subheader("Follow-up Questions and Responses")
 
             question = st.chat_input("Ask a follow-up question:")
             print(f"Follow-up question {len(st.session_state.follow_up_questions) + 1}:", question)
