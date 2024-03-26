@@ -101,26 +101,27 @@ def main():
 
     conditions_expander = st.expander("Conditions")
     with conditions_expander:
-        for condition in patient_data['conditions']:
-            st.write(f"- {condition}")
+        conditions_list = '\n'.join([f"- {condition}" for condition in patient_data['conditions']])
+        st.write(conditions_list)
 
     labs_expander = st.expander("Labs")
     with labs_expander:
-        for lab, value in patient_data['labs'].items():
-            st.write(f"- {lab}: {value}")
+        labs_list = '\n'.join([f"- {lab}: {value}" for lab, value in patient_data['labs'].items()])
+        st.write(labs_list)
 
     prescriptions_expander = st.expander("Prescriptions")
     with prescriptions_expander:
-        for prescription in patient_data['prescriptions']:
-            st.write(f"- {prescription}")
+        # Construct the bullet list as a single string with bold prescriptions
+        prescriptions_list = '\n'.join([f"- **{prescription}**" for prescription in patient_data['prescriptions']])
+        # Use st.markdown to display the bullet list with bold formatting
+        st.markdown(prescriptions_list, unsafe_allow_html=True)
 
     doctor_name = generate_doctor_name()
     specialist_visit_title = f"{patient_data['specialist_visit']['specialty']} Visit with Dr. {doctor_name} at {patient_data['specialist_visit']['facility']}"
     specialist_expander = st.expander(specialist_visit_title)
     with specialist_expander:
-        st.write(f"Date: {patient_data['specialist_visit']['date']}")
-        st.write(f"Summary: {patient_data['specialist_visit']['summary']}")
-        st.write(f"Cardiac Summary: {patient_data['specialist_visit']['cardiac_summary']}")
+        specialist_visit_list = f"Date: {patient_data['specialist_visit']['date']}\nSummary: {patient_data['specialist_visit']['summary']}\nCardiac Summary: {patient_data['specialist_visit']['cardiac_summary']}"
+        st.write(specialist_visit_list)
 
     patient_input_expander = st.expander("Patient Input (last 3 months)")
     with patient_input_expander:
