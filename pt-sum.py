@@ -7,43 +7,40 @@ openai.api_key = os.environ["OPENAI_API_KEY"]
 
 # Define patient data
 patient_data = {
-    "name": "Ben Hackett",
-    "age": 45,
-    "gender": "Male",
-    "summary": "Ben Hackett is a 45-year-old male with a history of type 2 diabetes, hypertension, hyperlipidemia, obesity, chronic kidney disease (stage 3), and sleep apnea. He has been managing his diabetes with metformin and lifestyle modifications but has been struggling with maintaining good glycemic control. His blood pressure and lipid levels are also elevated, and his kidney function is impaired.",
+    "name": "Pamela Rogers",
+    "age": 56,
+    "gender": "Female",
+    "summary": "Ms. Rogers is a 56 y/o WF who has been having chest pains for the last week. She was in her usual state of good health until one week prior to admission when she noticed the abrupt onset of chest pain, which she describes as dull and aching in character. The pain began in the left para-sternal area and radiated up to her neck. She has had 3 episodes of pain since the initial onset, with the most recent episode lasting 30 minutes and prompting her visit to the Emergency Department.",
     "conditions": [
-        "Type 2 Diabetes",
-        "Hypertension",
-        "Hyperlipidemia",
-        "Obesity",
-        "Chronic Kidney Disease (Stage 3)",
-        "Sleep Apnea"
+        "Chest pain with features of angina pectoris",
+        "Dyspnea",
+        "Recent onset hypertension",
+        "Abdominal bruit",
+        "Systolic murmur",
+        "Epigastric discomfort",
+        "History of peptic ulcer disease",
+        "Lumbo-sacral back pain",
+        "Fibrocystic breast disease",
+        "Penicillin allergy"
     ],
     "labs": {
-        "HbA1c": 7.5,
-        "Fasting Blood Glucose": 140,
-        "Total Cholesterol": 220,
-        "LDL": 140,
-        "HDL": 40,
-        "Triglycerides": 180,
-        "Blood Pressure": "145/90",
-        "eGFR": 50,
-        "BMI": 32,
-        "Urine Albumin-to-Creatinine Ratio (UACR)": 45
+        "Blood Pressure": "168/98",
+        "Pulse": "90",
+        "Respirations": "20",
+        "Temperature": "37 degrees"
     },
     "specialist_visit": {
         "specialty": "Cardiology",
-        "facility": "ABC Medical Center",
-        "date": "2023-03-15",
-        "summary": "Patient referred for evaluation of cardiovascular risk factors and potential complications related to his existing conditions. Echocardiogram showed mild left ventricular hypertrophy, likely due to longstanding hypertension. Stress test revealed no significant ischemic changes. Recommend aggressive management of hypertension, diabetes, and hyperlipidemia to reduce cardiovascular risk.",
-        "cardiac_summary": "Mild left ventricular hypertrophy, no significant ischemic changes on stress test. High risk for cardiovascular complications due to multiple comorbidities."
+        "facility": "Emergency Department",
+        "date": "6/2/04",
+        "summary": "Patient referred for evaluation of cardiovascular risk factors and potential complications related to her existing conditions. ECG and cardiac enzymes should be obtained to rule out myocardial infarction. Cardiac catheterization may be necessary to assess coronary artery disease.",
+        "cardiac_summary": "Chest pain with features of angina pectoris, dyspnea, and risk factors for coronary artery disease. Further evaluation and management required."
     },
-    "patient_input": "I've been trying to follow a low-carb diet and exercise more regularly, but I still struggle with late-night snacking. My sleep has improved slightly with the CPAP machine, but I often feel tired during the day. I've been taking my medications as prescribed.",
+    "patient_input": "The patient describes the onset of chest pain one week ago while working in her garden. She has had 2 additional episodes of pain since then, with the most recent episode lasting 30 minutes and prompting her visit to the Emergency Department. She becomes short of breath during these episodes but describes no other associated symptoms.",
     "prescriptions": [
-        "Metformin 1000 mg twice daily",
-        "Lisinopril 20 mg once daily",
-        "Atorvastatin 40 mg once daily",
-        "Aspirin 81 mg once daily"
+        "Lisinopril 10 mg orally once daily: Initiated for hypertension management. Lisinopril, as an angiotensin-converting enzyme (ACE) inhibitor, is prescribed to reduce systemic vascular resistance via vasodilation, with the therapeutic goal of lowering blood pressure to target levels, thus reducing the risk of hypertensive cardiovascular complications.",
+        "Metoprolol succinate 50 mg extended-release orally once daily: Indicated for angina pectoris and blood pressure control. This selective beta1-adrenergic receptor blocker is intended to decrease myocardial oxygen demand by lowering heart rate and contractility, thereby providing symptomatic relief from anginal episodes and contributing to the long-term management of ischemic heart disease.",
+        "Atorvastatin 20 mg orally once daily at bedtime: Prescribed for dyslipidemia with a family history of premature coronary artery disease (CAD). This HMG-CoA reductase inhibitor is aimed at reducing hepatic cholesterol synthesis, leading to an increase in the clearance of low-density lipoprotein (LDL) and a resultant decrease in plasma cholesterol levels. The goal is the primary prevention of atherosclerotic cardiovascular disease by mitigating hypercholesterolemia."
     ]
 }
 
@@ -111,19 +108,17 @@ def main():
 
     prescriptions_expander = st.expander("Prescriptions")
     with prescriptions_expander:
-        # Construct the bullet list as a single string with bold prescriptions
-        prescriptions_list = '\n'.join([f"- **{prescription}**" for prescription in patient_data['prescriptions']])
-        # Use st.markdown to display the bullet list with bold formatting
-        st.markdown(prescriptions_list, unsafe_allow_html=True)
+        prescriptions_list = '\n'.join([f"- {prescription}" for prescription in patient_data['prescriptions']])
+        st.write(prescriptions_list)
 
     doctor_name = generate_doctor_name()
-    specialist_visit_title = f"{patient_data['specialist_visit']['specialty']} Visit with Dr. {doctor_name} at {patient_data['specialist_visit']['facility']}"
+    specialist_visit_title = f"{patient_data['specialist_visit']['specialty']} Visit at {patient_data['specialist_visit']['facility']}"
     specialist_expander = st.expander(specialist_visit_title)
     with specialist_expander:
         specialist_visit_list = f"Date: {patient_data['specialist_visit']['date']}\nSummary: {patient_data['specialist_visit']['summary']}\nCardiac Summary: {patient_data['specialist_visit']['cardiac_summary']}"
         st.write(specialist_visit_list)
 
-    patient_input_expander = st.expander("Patient Input (last 3 months)")
+    patient_input_expander = st.expander("Patient Input")
     with patient_input_expander:
         st.write(patient_data['patient_input'])
 
@@ -138,20 +133,13 @@ def main():
     Summary: {patient_data['summary']}
     Conditions: {', '.join(patient_data['conditions'])}
     Labs:
-    - HbA1c: {patient_data['labs']['HbA1c']}
-    - Fasting Blood Glucose: {patient_data['labs']['Fasting Blood Glucose']}
-    - Total Cholesterol: {patient_data['labs']['Total Cholesterol']}
-    - LDL: {patient_data['labs']['LDL']}
-    - HDL: {patient_data['labs']['HDL']}
-    - Triglycerides: {patient_data['labs']['Triglycerides']}
     - Blood Pressure: {patient_data['labs']['Blood Pressure']}
-    - eGFR: {patient_data['labs']['eGFR']}
-    - BMI: {patient_data['labs']['BMI']}
-    - Urine Albumin-to-Creatinine Ratio (UACR): {patient_data['labs']['Urine Albumin-to-Creatinine Ratio (UACR)']}
+    - Pulse: {patient_data['labs']['Pulse']}
+    - Respirations: {patient_data['labs']['Respirations']}
+    - Temperature: {patient_data['labs']['Temperature']}
     
     Specialist Visit:
     - Specialty: {patient_data['specialist_visit']['specialty']}
-    - Doctor: Dr. {doctor_name}
     - Facility: {patient_data['specialist_visit']['facility']}
     - Date: {patient_data['specialist_visit']['date']}
     - Summary: {patient_data['specialist_visit']['summary']}
@@ -160,7 +148,7 @@ def main():
     Prescriptions:
     {chr(10).join([f"- {prescription}" for prescription in patient_data['prescriptions']])}
 
-    Patient Input (last 3 months): {patient_data['patient_input']}
+    Patient Input: {patient_data['patient_input']}
 
     Based on this information, provide a concise bullet-point summary (no more than 3 bullet points) of the key points to discuss and potential treatment adjustments for the upcoming patient visit. Each bullet point should be around 25 words, with an absolute maximum of 50 words. Be as concise as possible.
     """
